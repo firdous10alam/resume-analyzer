@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Resume Analyzer</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- Bootstrap Bundle (JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #2563eb;    /* Bold professional blue */
+      --secondary-color: #3b82f6;  /* Lighter accent blue */
+      --accent-color: #7c3aed;     /* Elegant purple accent */
+      --background-light: #f8fafc; /* Clean light background */
+      --text-dark: #1e293b;        /* Dark text for contrast */
+      --success-green: #10b981;    /* Fresh success green */
+      --error-red: #ef4444;        /* Alert red */
+    }
+    body {
+      background: var(--background-light);
+      color: var(--text-dark);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    /* Navigation Bar */
+    .navbar {
+      background: var(--primary-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1rem 2rem;
+    }
+    /* Sticky navbar */
+    .sticky-top {
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+    }
+    .navbar-brand {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: white !important;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+    }
+    .navbar-brand i {
+      margin-right: 10px;
+      font-size: 28px;
+    }
+    .nav-link {
+      color: white !important;
+      font-weight: 500;
+      margin: 0 10px;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: white;
+      transition: all 0.3s ease-in-out;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+      left: 0;
+    }
+    .nav-link:hover {
+      transform: translateY(-2px);
+      color: var(--secondary-color) !important;
+      cursor: pointer;
+    }
+    .navbar-toggler {
+      border: none;
+      outline: none;
+    }
+    /* Main White Container */
+    .main-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 2.5rem;
+      color: #333;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+        }
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+    /* Upload Box */
+    .upload-box {
+      border: 2px solid var(--primary-color);
+      background: #f1f5f9;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 2.5rem;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .upload-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+      border-color: var(--secondary-color);
+    }
+    .upload-box i {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.btn-primary {
+  background: var(--primary-color);
+  border: none;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+    .job-card .btn-primary {
+      width: auto;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    /* Skills List Group Items */
+    .list-group-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      margin: 0.25rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      flex-direction: row-reverse; /* Reverse order */
+      justify-content: flex-end; /* Keep content aligned left */
+    }
+    .list-group-item .badge {
+    order: 1; /* Move badge to left */
+    margin-right: 0.75rem; /* Space after number */
+    margin-left: 0; /* Remove left margin */
+    border-radius: 20px; /* Pill shape */
+    min-width: 32px; /* Consistent width */
+    padding: 0.25em 0.75em;
+ } 
+    .list-group-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .badge {
+      background: var(--accent-color);
+      border-radius: 12px;
+      padding: 0.35em 0.65em;
+    }
+    /* Job Listings Container */
+    .job-listings-container {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-top: 2rem;
+      padding: 2rem;
+    }
+    .job-listings-container h2 {
+      color: var(--text-dark);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    /* Job Card */
+    .job-card {
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid var(--primary-color);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    .job-card:hover {
+      border-left-width: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-4px);
+    }
+    .job-card .card-body {
+      padding: 15px;
+    }
+    .job-card .card-footer {
+      border-top: 1px solid #ddd;
+      padding: 10px 15px;
+    }
+    .progress-bar {
+    background: linear-gradient(
+        90deg, 
+        var(--primary-color) 0%, 
+        var(--accent-color) 100%
+    );
+    border-radius: 12px;
+    position: relative;
+    overflow: visible;
+    box-shadow: 
+        inset 2px 2px 4px rgba(0,0,0,0.1),
+        0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: shine 2s infinite;
+}
+    #radarChart {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .navbar-brand {
+        font-size: 20px;
+      }
+      .navbar-brand i {
+        font-size: 24px;
+      }
+      .nav-link {
+        font-size: 14px;
+        margin: 0 5px;
+        padding: 6px 10px;
+      }
+      .main-container {
+        margin: 20px auto;
+        padding: 15px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      .btn-primary {
+        font-size: 14px;
+      }
+      .list-group-item {
+        font-size: 12px;
+      }
+    }
+    @media (max-width: 480px) {
+      .navbar-brand {
+        font-size: 18px;
+      }
+      .navbar-brand i {
+        font-size: 22px;
+      }
+      .nav-link {
+        font-size: 12px;
+        margin: 0 3px;
+        padding: 5px 8px;
+      }
+      .main-container {
+        margin: 15px auto;
+        padding: 10px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      .btn-primary {
+        font-size: 12px;
+      }
+      .list-group-item {
+        font-size: 10px;
+      }
+    }
+    /* Description Toggle Styles */
+    .description-container {
+      display: inline;
+    }
+    .toggle-more {
+      margin-left: 5px;
+      color: #4a47a3;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    canvas {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #matchSummary {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0d6efd;
+    }
+    /* Ensure main container scales smoothly */
+@media (max-width: 991px) {
+  .main-container {
+    margin: 20px 10px;
+    padding: 15px;
+  }
+
+  .upload-box p {
+    font-size: 14px;
+  }
+
+  .job-card {
+    margin: 10px 0;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Stack elements better on small screens */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 18px;
+  }
+
+  .navbar-toggler {
+    font-size: 16px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .upload-box {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  h1, h4, h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .job-card .card-body, 
+  .job-card .card-footer {
+    padding: 10px;
+  }
+
+  .list-group-item {
+    font-size: 12px;
+    flex: 1 1 45%;
+    text-align: center;
+  }
+
+  .d-flex.gap-2 {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+/* Adjust for very narrow devices */
+@media (max-width: 480px) {
+  .nav-link {
+    font-size: 12px;
+    margin: 0 2px;
+    padding: 4px 6px;
+  }
+
+  .list-group-item {
+    flex: 1 1 100%;
+    margin: 4px 0;
+  }
+
+  .job-card .card-title {
+    font-size: 16px;
+  }
+
+  .job-card img {
+    max-width: 60px;
+    max-height: 60px;
+  }
+
+  .job-listings-container {
+    padding: 15px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar with sticky-top so it remains visible on scroll -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-file-alt"></i> Resume Analyzer
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='/signup'"><i class="fas fa-sign-in-alt"></i> Sign Up</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="window.location.href='/login'"><i class="fas fa-user"></i> Login</a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-address-book"></i> Contacts</a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main White Container -->
+  <div class="main-container">
+    <h1><i class="fas fa-file-upload"></i> Resume Analyzer</h1>
+    <!-- Resume Upload Form -->
+    <form action="/" method="POST" enctype="multipart/form-data" class="mt-4">
+      <div class="upload-box" onclick="document.getElementById('resume').click()">
+        <p><i class="fas fa-cloud-upload-alt fa-2x"></i></p>
+        <p>Click to upload your resume (PDF/DOCX)</p>
+        <input type="file" class="form-control d-none" id="resume" name="resume" accept=".pdf,.docx" required>
+      </div>
+      <button type="submit" class="btn btn-primary mt-3">
+        <i class="fas fa-search"></i> Process/Analyze
+      </button>
+    </form>
+
+    <!-- Error Message Display -->
+    {% if error_message %}
+      <div class="alert alert-danger mt-4" role="alert">
+        <strong>Error:</strong> {{ error_message }}
+      </div>
+    {% endif %}
+
+    <!-- Name from Resume -->
+    {% if user_name %}
+      <div class="alert alert-info mt-4" role="alert">
+        <strong>Name from Resume:</strong> {{ user_name }}
+      </div>
+    {% endif %}
+
+    <!-- Predicted Job Role Display -->
+    {% if predicted_job %}
+      <div class="alert alert-success mt-4" role="alert">
+        <strong>Predicted Job Role:</strong> {{ predicted_job }}
+      </div>
+    {% endif %}
+
+    <!-- Resume Score and Category Display -->
+    {% if resume_score is not none %}
+    <div class="alert alert-warning mt-4" role="alert">
+      <strong>Resume Score:</strong> {{ resume_score }}
+      {% if resume_score >= 9 %}
+        (<span class="text-success">Good</span>)
+      {% elif resume_score >= 5 %}
+        (<span class="text-warning">Moderate</span>)
+      {% else %}
+        (<span class="text-danger">Bad</span>)
+      {% endif %}
+    </div>
+
+    <!-- Progress Bar Visualization -->
+    <div class="mt-2">
+      <div class="progress">
+        <div 
+          class="progress-bar" 
+          role="progressbar" 
+          style="width: {{ (resume_score/10)*100 }}%;" 
+          aria-valuenow="{{ (resume_score/10)*100 }}" 
+          aria-valuemin="0" 
+          aria-valuemax="100">
+          {{ resume_score }}/10
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Extracted Skills Display -->
+    {% if extracted_skills and extracted_skills|length > 0 %}
+      <div class="mt-4">
+        <h4><i class="fas fa-lightbulb"></i> Extracted Skills</h4>
+        <ul class="list-group list-group-horizontal flex-wrap">
+          {% for skill in extracted_skills %}
+            <li class="list-group-item d-flex align-items-center m-1">
+              {{ skill }}
+              <span class="badge bg-primary ms-2">{{ loop.index }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- Recommended Skills Display -->
+{% if missing_skills and missing_skills|length > 0 %}
+<div class="mt-4">
+  {% if predicted_job %}
+    <h4><i class="fas fa-tools"></i> Recommended Skills for {{ predicted_job }}</h4>
+  {% else %}
+    <h4><i class="fas fa-tools"></i> Recommended Skills</h4>
+  {% endif %}
+  <ul class="list-group list-group-horizontal flex-wrap">
+    {% for skill in missing_skills %}
+      <li class="list-group-item list-group-item-warning m-1 d-flex align-items-center">
+        <span class="badge bg-primary me-2">{{ loop.index }}</span>
+        {{ skill }}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<h2>Skill Match Radar Chart</h2>
+<canvas id="radarChart"></canvas>
+<p id="matchSummary"></p>
+
+<!-- Download Buttons -->
+<div class="d-flex gap-2 mt-2">
+  <button onclick="downloadChart()" class="btn btn-primary">
+    <i class="fas fa-download"></i> Download Chart
+  </button>
+  <button onclick="prepareDownload()" class="btn btn-secondary mt-3">
+    <i class="fas fa-file-pdf"></i> Download PDF Report
+  </button>  
+</div>
+    <!-- Job Listings -->
+    <div class="job-listings-container">
+      <h2><i class="fas fa-briefcase"></i> Job Listings</h2>
+      {% if job_list and job_list|length > 0 %}
+        <div class="d-flex flex-column align-items-center w-100">
+          {% for job in job_list %}
+          <div class="card job-card mb-3">
+            <div class="card-body">
+              <!-- Employer Logo (if available) -->
+              {% if job.employer_logo %}
+              <div class="mb-3" style="float: left;">
+                <img 
+                  src="{{ job.employer_logo }}" 
+                  alt="Company Logo" 
+                  style="max-width: 80px; max-height: 80px; object-fit: contain;"
+                >
+              </div>
+              {% endif %}
+
+              <!-- Job Title & City -->
+              <h5 class="card-title">
+                {{ job.job_title or "N/A" }}
+                {% if job.job_city %}
+                  – {{ job.job_city }}
+                {% endif %}
+              </h5>
+              <!-- Company Name -->
+              <p class="mb-1">
+                <strong>Company:</strong> {{ job.employer_name or "Unknown Company" }}
+              </p>
+              <!-- Location -->
+              {% if job.job_location %}
+                <p class="mb-1">
+                  <strong>Location:</strong> {{ job.job_location }}
+                </p>
+              {% endif %}
+
+              <!-- Employment Type -->
+              {% if job.job_employment_type %}
+                <p class="mb-1">
+                  <strong>Employment Type:</strong> {{ job.job_employment_type }}
+                </p>
+              {% endif %}
+
+              <!-- Description with More/Less Toggle -->
+              <p class="mb-1">
+                <strong>Description:</strong>
+                {% if job.job_description and job.job_description|length > 300 %}
+                  <span class="description-container">
+                    <span class="truncated">{{ job.job_description[:300] }}</span>
+                    <span class="ellipsis">...</span>
+                    <span class="full-text" style="display: none;">{{ job.job_description }}</span>
+                    <a href="#" class="toggle-more">more</a>
+                  </span>
+                {% else %}
+                  {{ job.job_description or "No description available." }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                <strong>Posted Date:</strong> {{ job.job_posted_at or "N/A" }}
+              </small>
+              {% if job.job_apply_link %}
+                <a href="{{ job.job_apply_link }}" class="btn btn-primary btn-sm" target="_blank">Apply</a>
+              {% else %}
+                <button class="btn btn-primary btn-sm" disabled>Apply</button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-center text-white">No job listings found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- JavaScript for File Selection and Description Toggle -->
+  <script>
+    // Update upload box text when a file is selected
+    document.getElementById('resume').addEventListener('change', function() {
+      document.querySelector('.upload-box p').innerText = this.files[0].name;
+    });
+
+    // Description Toggle Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.toggle-more').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var container = this.closest('.description-container');
+          var truncated = container.querySelector('.truncated');
+          var ellipsis = container.querySelector('.ellipsis');
+          var fullText = container.querySelector('.full-text');
+          if (fullText.style.display === 'none') {
+            fullText.style.display = 'inline';
+            truncated.style.display = 'none';
+            ellipsis.style.display = 'none';
+            this.innerText = 'less';
+          } else {
+            fullText.style.display = 'none';
+            truncated.style.display = 'inline';
+            ellipsis.style.display = 'inline';
+            this.innerText = 'more';
+          }
+        });
+      });
+    });
+  </script>
+
+<script>
+  async function renderRadarChart() {
+      const response = await fetch("/api/skill-match-data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              job_role: "{{ predicted_job }}",
+              extracted_skills: {{ extracted_skills | tojson }}
+          })
+      });
+
+      const data = await response.json();
+      const ctx = document.getElementById('radarChart').getContext('2d');
+
+      const radarChart = new Chart(ctx, {
+          type: 'radar',
+          data: {
+              labels: data.labels,
+              datasets: [{
+                  label: 'Skill Match (1 = Match, 0 = Missing)',
+                  data: data.values,
+                  fill: true,
+                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  pointBackgroundColor: data.values.map(v => v === 1 ? 'rgba(0, 200, 83, 1)' : 'rgba(220, 53, 69, 1)'), // Green for match, Red for missing
+                  pointRadius: 6,
+                  pointHoverRadius: 8
+              }]
+          },
+          options: {
+              responsive: true,
+              animation: {
+                  duration: 1500,
+                  easing: 'easeOutBounce'
+              },
+              scales: {
+                  r: {
+                      min: 0,
+                      max: 1,
+                      ticks: {
+                          stepSize: 1
+                      }
+                  }
+              },
+              plugins: {
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              const skill = context.label;
+                              const value = context.raw;
+                              return `${skill}: ${value ? '✅ Matched' : '❌ Missing'}`;
+                          }
+                      }
+                  },
+                  legend: {
+                      labels: {
+                          font: {
+                              size: 14
+                          }
+                      }
+                  }
+              }
+          }
+      });
+
+      // Display match percentage
+      const matchPercentage = (data.values.filter(v => v === 1).length / data.values.length) * 100;
+      document.getElementById("matchSummary").innerText = `✅ Overall Skill Match: ${matchPercentage.toFixed(0)}%`;
+  }
+
+  function downloadChart() {
+      const canvas = document.getElementById('radarChart');
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'skill_match_chart.png';
+      link.click();
+  }
+
+  window.onload = renderRadarChart;
+
+  async function sendChartToServer() {
+    const canvas = document.getElementById('radarChart');
+    const chartImage = canvas.toDataURL('image/png');
+
+    await fetch("/upload-chart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chart: chartImage })
+    });
+  }
+
+  // Called when PDF download is requested
+  async function prepareDownload() {
+    await sendChartToServer();
+    window.location.href = "/download-report";
+  }
+</script>
+</body>
+</html>
